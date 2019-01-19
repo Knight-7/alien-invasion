@@ -4,10 +4,10 @@ import pygame
 class Ship():
     """飞船的类"""
 
-    def __init__(self,ai_settings, screen):
+    def __init__(self, ai_settings, screen):
         """初始化飞船并设置其初始位置"""
         self.screen = screen
-        self.ai_settings=ai_settings
+        self.ai_settings = ai_settings
 
         # 加载飞船图像并获取其外接矩形
         self.image = pygame.image.load('Alien Invasion/images/ship.bmp')
