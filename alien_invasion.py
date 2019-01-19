@@ -6,6 +6,7 @@ import game_functions as gf
 from settings import Settings
 from ship import Ship
 from bullet import Bullet
+from alien import Alien
 
 
 def run_game():
@@ -20,10 +21,11 @@ def run_game():
     ship = Ship(ai_settings, screen)
     # 创建一个用于存储子弹的编组
     bullets = Group()
+    # 创建一个外星人
+    alien = Alien(ai_settings,screen)
 
     # 开始游戏的主循环
     while True:
-
         # 监视键盘和鼠标事件
         gf.check_events(ai_settings, screen, ship, bullets)
         # 更改飞船的位置
@@ -31,7 +33,7 @@ def run_game():
         # 更新子弹的位置
         gf.update_bullets(bullets)
         # 每次循环时都重绘屏幕
-        gf.update_screen(ai_settings, screen, ship, bullets)
+        gf.update_screen(ai_settings, screen, ship, alien, bullets)
 
 
 run_game()
