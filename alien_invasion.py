@@ -33,7 +33,9 @@ def run_game():
         # 更改飞船的位置
         ship.update()
         # 更新子弹的位置
-        gf.update_bullets(bullets)
+        gf.update_bullets(aliens, bullets)
+        # 更新外星人的位置
+        gf.update_aliens(ai_settings, aliens)
         # 每次循环时都重绘屏幕
         gf.update_screen(ai_settings, screen, ship, aliens, bullets)
 
