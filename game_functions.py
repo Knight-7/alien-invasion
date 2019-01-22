@@ -1,4 +1,5 @@
 import sys
+import time
 
 import pygame
 from bullet import Bullet
@@ -103,11 +104,40 @@ def check_fleet_edges(ai_settings, aliens):
             break
 
 
-def update_aliens(ai_settings, aliens):
+def check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets):
+    """检查是否有外星人碰到底部"""
+    screen_rect = screen.get_rect()
+    for alien in aliens.sprites():
+        if alien.rect.bottom >= screen_rect.bottom:
+            ship_hit(ai_settings, stats, screen, ship, aliens, bullets)
+            break
+
+
+def ship_hit(ai_settings, stats, screen, ship, aliens, bullets):
+    """响应被外星人撞到的飞船"""
+    # 首先将飞船数减1
+    stats.ships_left -= 1
+    # 清空外星人列表和子弹列表
+    aliens.empty()
+    bullets.empty()
+    # 创建一群新的外星人，并将飞船放到屏幕底部中央
+    creat_fleet(ai_settings, screen, ship, aliens)
+    ship.center_ship()
+    # 暂停
+    time.sleep(0.5)
+
+
+def update_aliens(ai_settings, stats, screen, ship, aliens, bullets):
     """检查外星人是否到达边缘，
     更新外星人群中所有外星人的位置"""
     check_fleet_edges(ai_settings, aliens)
     aliens.update()
+
+    # 检测外星人和飞船的碰撞
+    if pygame.sprite.spritecollideany(ship, aliens):
+        ship_hit(ai_settings, stats, screen, ship, aliens, bullets)
+
+    check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets)
 
 
 def update_screen(ai_settings, screen, ship, aliens, bullets):
@@ -123,7 +153,19 @@ def update_screen(ai_settings, screen, ship, aliens, bullets):
     pygame.display.flip()
 
 
-def update_bullets(aliens, bullets):
+def check_bullet_alien_collisions(ai_settings, screen, ship, aliens, bullets):
+    # 检查是否有子弹击中了外星人
+    # 如果这样，就删除相应的子弹和外星人
+    collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
+
+    # 当所有的外星人都被消灭之后，生成新的外星人
+    if len(aliens) == 0:
+        # 删除所有的子弹
+        bullets.empty()
+        creat_fleet(ai_settings, screen, ship, aliens)
+
+
+def update_bullets(ai_settings, screen, ship, aliens, bullets):
     """更新子弹的位置，并删除已消失的子弹"""
     # 更新子弹的位置
     bullets.update()
@@ -133,6 +175,4 @@ def update_bullets(aliens, bullets):
         if bullet.rect.bottom <= 0:
             bullets.remove(bullet)
 
-    # 检查是否有子弹击中了外星人
-    # 如果这样，就删除相应的子弹和外星人
-    collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
+    check_bullet_alien_collisions(ai_settings, screen, ship, aliens, bullets)
