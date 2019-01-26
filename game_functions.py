@@ -37,7 +37,7 @@ def check_keyup_events(event, ship):
 
 def check_play_button(ai_settings, screen, stats, play_button, ship, aliens, bullets, mouse_x, mouse_y):
     """在玩家点击play按钮时开始游戏"""
-    button_clicked=play_button.rect.collidepoint(mouse_x,mouse_y)
+    button_clicked = play_button.rect.collidepoint(mouse_x, mouse_y)
     if button_clicked and not stats.game_active:
         # 重置游戏统计信息
         stats.reset_stats()
@@ -160,7 +160,6 @@ def ship_hit(ai_settings, stats, screen, ship, aliens, bullets):
         pygame.mouse.set_visible(True)
 
 
-
 def update_aliens(ai_settings, stats, screen, ship, aliens, bullets):
     """检查外星人是否到达边缘，
     更新外星人群中所有外星人的位置"""
@@ -174,7 +173,7 @@ def update_aliens(ai_settings, stats, screen, ship, aliens, bullets):
     check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets)
 
 
-def update_screen(ai_settings, screen, stats, ship, aliens, bullets, play_screen):
+def update_screen(ai_settings, screen, stats, sb, ship, aliens, bullets, play_screen):
     """更新屏幕上的图像，并切换到新屏幕"""
     # 每次循环时都重绘屏幕
     screen.fill(ai_settings.bg_color)
@@ -182,6 +181,8 @@ def update_screen(ai_settings, screen, stats, ship, aliens, bullets, play_screen
         bullet.draw_bullet()
     ship.blitme()
     aliens.draw(screen)
+    # 显示得分
+    sb.show_score()
     # 如果游戏处于非活动状态，就显示按钮
     if not stats.game_active:
         play_screen.draw_button()
@@ -190,10 +191,15 @@ def update_screen(ai_settings, screen, stats, ship, aliens, bullets, play_screen
     pygame.display.flip()
 
 
-def check_bullet_alien_collisions(ai_settings, screen, ship, aliens, bullets):
+def check_bullet_alien_collisions(ai_settings, screen, stats, sb, ship, aliens, bullets):
     # 检查是否有子弹击中了外星人
     # 如果这样，就删除相应的子弹和外星人
     collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
+
+    if collisions:
+        for aliens in collisions.values():
+            stats.score += ai_settings.alien_points*len(aliens)
+            sb.prep_score()
 
     # 当所有的外星人都被消灭之后，生成新的外星人
     if len(aliens) == 0:
@@ -203,7 +209,7 @@ def check_bullet_alien_collisions(ai_settings, screen, ship, aliens, bullets):
         creat_fleet(ai_settings, screen, ship, aliens)
 
 
-def update_bullets(ai_settings, screen, ship, aliens, bullets):
+def update_bullets(ai_settings, screen, stats, sb, ship, aliens, bullets):
     """更新子弹的位置，并删除已消失的子弹"""
     # 更新子弹的位置
     bullets.update()
@@ -213,4 +219,5 @@ def update_bullets(ai_settings, screen, ship, aliens, bullets):
         if bullet.rect.bottom <= 0:
             bullets.remove(bullet)
 
-    check_bullet_alien_collisions(ai_settings, screen, ship, aliens, bullets)
+    check_bullet_alien_collisions(
+        ai_settings, screen, stats, sb, ship, aliens, bullets)
